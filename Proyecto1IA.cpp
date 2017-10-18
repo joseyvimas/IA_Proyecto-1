@@ -3,7 +3,17 @@
 
 #include <iostream>
 #include <string>
+#include <stdlib.h>
+#include <list>
 using namespace std;
+
+// Estructura para almacenar estados
+struct state {
+    int pos_actual_X;
+    int pos_actual_Y;
+    int Time_Left;
+    char possible_Mov;
+};
 
 int N; //Filas del hangar
 int M; //Columna del hangar
@@ -81,6 +91,64 @@ void shootStormtrooper(char **hangar, int x, int y){
 	}
 }
 
+//Usar la fuerza contra los Stormtroopers
+bool ForceStormtrooper(char **hangar, int x, int y){
+	bool killStormtrooper = false ; //Bandera que indica si se mato un trooper usando la fuerza
+	// usar fuerza con los troopers N, NO, NE
+	if (x-1 >= 0){
+		if (hangar[x-1][y] == 'S'){
+			hangar[x-1][y] = '.';
+			killStormtrooper = true;
+		}
+		
+	}
+	if (x-1 >= 0 && (y-1) >= 0){
+		if (hangar[x-1][y-1] == 'S'){
+			hangar[x-1][y-1] = '.';
+			killStormtrooper = true;
+		}
+	}
+	if (x-1 >= 0 && (y+1) <= M){
+		if (hangar[x-1][y+1] == 'S'){
+			hangar[x-1][y+1] = '.';
+			killStormtrooper = true;
+		}
+	}
+	// usar fuerza con los troopers O, E
+	if (y-1 >= 0){
+		if (hangar[x][y-1] == 'S'){
+			hangar[x][y-1] = '.';
+			killStormtrooper = true;
+		}
+	}
+	
+	if (y+1 < M){
+		if (hangar[x][y+1] == 'S'){
+			hangar[x][y+1] = '.';
+			killStormtrooper = true;
+		}
+	}
+	
+	// usar fuerza con los troopers S, SO, SE
+	if (x+1 <N){
+		if (hangar[x+1][y] == 'S'){
+			hangar[x+1][y] = '.';
+			killStormtrooper = true;
+		}
+	}
+	if (x+1 < N && (y-1) >= 0){
+		if (hangar[x+1][y-1] == 'S'){
+			hangar[x+1][y-1] = '.';
+			killStormtrooper = true;
+		}
+	}
+	if (x+1 < N && (y+1) <= M){
+		if (hangar[x+1][y+1] == 'S'){
+			hangar[x+1][y+1] = '.';
+			killStormtrooper = true;
+		}
+	}
+}
 void printHangar(char **hangar){
 	int i,j;
 	for (i=0; i<N; i++){
@@ -88,6 +156,18 @@ void printHangar(char **hangar){
 			cout << hangar[i][j];
 		}
 		cout << endl;
+	}
+}
+void getLuke(char **hangar,int &posX,int &posY){
+	int i,j;
+	for (i=0; i<N; i++){
+		for (j=0; j<M; j++){
+			if(hangar[i][j] == 'L'){
+				posX = i;
+				posY = j;
+				break;
+			}
+		}
 	}
 }
 
@@ -99,6 +179,10 @@ int main(){
 	
 	//Creamos el hangar
 	char **hangar;
+	// creamos a flag 
+	bool IKill=false;
+	// posicion de Luke
+	int posX,posY;
 	//Array de punteros de char (A las filas solamente)
     hangar = new char*[N];
 	//Ahora a las columnas
@@ -121,7 +205,21 @@ int main(){
 			SL...S...S 
 			SSS......S
 	 */
+	/*IKill = ForceStormtrooper(hangar ,1,1);*/
 	printHangar(hangar);
+	cout<< endl;
+	/*getLuke(hangar,posX,posY);
+	cout<< "posX: "<<posX <<" posY: "<<posY;*/
 	
+/*	// Marcar toda la matriz como no visitada
+    bool *visited = new bool[N];
+    for(int i = 0; i < V; i++)
+        visited[i] = false; //arreglar
+	
+    // Crear cola para el BFS
+    list<state> queue;*/
+	
+	system("pause");
 	return 0;
 }
+
