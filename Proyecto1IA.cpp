@@ -13,7 +13,8 @@ struct state {
     int pos_actual_Y;
     int Time_Left;
     char possible_Mov;
-};
+    bool **hangarAux;
+} estado;
 
 int N; //Filas del hangar
 int M; //Columna del hangar
@@ -179,10 +180,12 @@ int main(){
 	
 	//Creamos el hangar
 	char **hangar;
-	// creamos a flag 
+	//Creamos a flag 
 	bool IKill=false;
-	// posicion de Luke
+	//Posicion de Luke
 	int posX,posY;
+	
+	//Dandole dimensiones al hangar
 	//Array de punteros de char (A las filas solamente)
     hangar = new char*[N];
 	//Ahora a las columnas
@@ -196,8 +199,17 @@ int main(){
 			cin >> hangar[i][j];
 		}
 	} 
+	
+	//Se le da dimensiones a la matriz auxiliar del struct y se marca como no visitada
+    estado.hangarAux = new bool*[N];
+    
+    for(int x=0; x<N; x++){
+        estado.hangarAux[x] = new bool[M]; 
+        estado.hangarAux[x] = false;
+    }
 
 	cout << endl;
+	
 	//shootStormtrooper(hangar,1,1);
 	/*
 			3 10 10 
@@ -205,20 +217,16 @@ int main(){
 			SL...S...S 
 			SSS......S
 	 */
-	/*IKill = ForceStormtrooper(hangar ,1,1);*/
+	//IKill = ForceStormtrooper(hangar ,1,1);
+	
+	
 	printHangar(hangar);
 	cout<< endl;
-	/*getLuke(hangar,posX,posY);
-	cout<< "posX: "<<posX <<" posY: "<<posY;*/
-	
-/*	// Marcar toda la matriz como no visitada
-    bool *visited = new bool[N];
-    for(int i = 0; i < V; i++)
-        visited[i] = false; //arreglar
-	
-    // Crear cola para el BFS
+		
+    /* Crear cola para el BFS
     list<state> queue;*/
 	
+
 	system("pause");
 	return 0;
 }
