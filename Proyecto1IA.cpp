@@ -14,6 +14,7 @@ struct state {
     int Time_Left;
     char possible_Mov;
     bool **hangarAux;
+    char *possible_Solution;
 } estado;
 
 int N; //Filas del hangar
@@ -171,7 +172,84 @@ void getLuke(char **hangar,int &posX,int &posY){
 		}
 	}
 }
-
+bool solucion(char **hangarAux, int Tiempo){
+	if(Tiempo <= T){
+		for (i=0; i<N; i++){
+			for (j=0; j<M; j++){
+				if(hangar[i][j] == 'S'){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+void encolarVecinos(estado_actual, cola){
+	if(fuerza en mi estado actual ){
+		//crear estado
+		//aplicar cambios
+		//encolar
+		
+	}
+	else if(disparar en mi estado actual ){
+		if(disparar norte){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+		if(disparar sur){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+		if(disparar este){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}if(disparar oeste){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+		
+	}
+	else{
+		if(moverme(estado_actual.posicionluke,estado_actual.marcas,Norte)){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+		if(moverme(estado_actual.posicionluke,estado_actual.marcas,Sur)){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+		if(moverme(estado_actual.posicionluke,estado_actual.marcas,Este)){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+		if(moverme(estado_actual.posicionluke,estado_actual.marcas,oeste)){
+			//crear estado
+		//aplicar cambios
+		//encolar
+		}
+	}
+	
+}
+void busqueda (cola){
+	state = estado_actual;
+	estado_actual = cola.top();
+	if( solucion(estado_actual.hangarAux,estado_actual.Time_Left) ){
+		return estado_actual.possible_Solution;
+	}
+	encolarVecinos(estado_actual,cola);
+	cola.pop();
+	busqueda(cola);
+}
 int main(){
 	//Se leen las dimensiones del hangar y el tiempo
 	cin >> N;
