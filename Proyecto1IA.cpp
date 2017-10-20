@@ -4,24 +4,85 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include <list>
+#include <queue>
 using namespace std;
-
-// Estructura para almacenar estados
-struct state {
-    int pos_actual_X;
-    int pos_actual_Y;
-    int Time_Left;
-    char possible_Mov;
-    char **hangarAux;
-    bool **marcas;
-    char *possible_Solution;
-} estado;
 
 int N; //Filas del hangar
 int M; //Columna del hangar
 int T; //Tiempo en el centro de operaciones explotara
 
+class  State{
+	public:
+		int pos_actual_X;
+	    int pos_actual_Y;
+	    int Time_Left;
+	    char possible_Mov;
+	    char **hangarAux;
+	    bool **marcas;
+	    char *possible_Solution;
+	    
+	    State(){
+	    	this->pos_actual_X = 0;
+	    	this->pos_actual_Y = 0;
+	    	this->Time_Left = 0;
+	    	this->hangarAux = new char*[N];
+	    	 for(int x=0; x<N; x++){
+		        this->hangarAux[x] = new char[M]; 
+		        this->hangarAux[x] = false;
+		    }
+	    	this->marcas = new bool*[N];
+	    	for(int x=0; x<N; x++){
+		        this->marcas[x] = new bool[M]; 
+		        this->marcas[x] = false;
+		    }
+	    	this->possible_Solution = new char[N];
+	    }
+	    State( int pos_actual_X, int pos_actual_Y, int Time_Left, char **hangarAux, bool **marcas){
+	    	this->pos_actual_X = pos_actual_X;
+	    	this->pos_actual_Y = pos_actual_Y;
+	    	this->Time_Left = Time_Left;
+	    	this->hangarAux = hangarAux;
+	    	this->marcas = marcas;
+	    	this->possible_Solution = new char[N];
+	    }
+	    void getLuke(){
+			int i,j;
+			for (i=0; i<N; i++){
+				for (j=0; j<M; j++){
+					if(this->hangarAux[i][j] == 'L'){
+						this->pos_actual_X = i;
+						this->pos_actual_Y = j;
+						break;
+					}
+				}
+			}
+		}
+	    bool solucion(int Tiempo){
+			if(Tiempo <= T){
+				for (int i=0; i<N; i++){
+					for (int j=0; j<M; j++){
+						if(this->hangarAux[i][j] == 'S'){
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+};   
+//sobrecargar el operador <
+bool operator< (const State& structState1, const State &structState2)
+{
+return structState1.Time_Left > structState2.Time_Left;
+}
+//sobrecargar el operador > 
+bool operator> (const State& structState1, const State &structState2)
+{
+return structState1.Time_Left < structState2.Time_Left;
+}
 
 //Funcion que verifica si se puede disparar a un Stormtrooper dependiendo las direcciones cardinales
 //recibe el hangar, la posición x,y de Luke, y la direccion
@@ -92,40 +153,83 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 
 
 //Usar la fuerza contra los Stormtroopers
-bool ForceStormtrooper(char **hangar, int x, int y){
-	bool killStormtrooper = false ; //Bandera que indica si se mato un trooper usando la fuerza
+bool CanForceStormtrooper(char **hangar, int x, int y){
+	// usar fuerza con los troopers N, NO, NE
+	if (x-1 >= 0){
+		if (hangar[x-1][y] == 'S'){
+			return true;
+		}
+		
+	}
+	if (x-1 >= 0 && (y-1) >= 0){
+		if (hangar[x-1][y-1] == 'S'){
+			return true;
+		}
+	}
+	if (x-1 >= 0 && (y+1) <= M){
+		if (hangar[x-1][y+1] == 'S'){
+			return true;
+		}
+	}
+	// usar fuerza con los troopers O, E
+	if (y-1 >= 0){
+		if (hangar[x][y-1] == 'S'){
+			return true;
+		}
+	}
+	
+	if (y+1 < M){
+		if (hangar[x][y+1] == 'S'){
+			return true;
+		}
+	}
+	
+	// usar fuerza con los troopers S, SO, SE
+	if (x+1 <N){
+		if (hangar[x+1][y] == 'S'){
+			return true;
+		}
+	}
+	if (x+1 < N && (y-1) >= 0){
+		if (hangar[x+1][y-1] == 'S'){
+			return true;
+		}
+	}
+	if (x+1 < N && (y+1) <= M){
+		if (hangar[x+1][y+1] == 'S'){
+			return true;
+		}
+	}
+	return false;
+}
+void ForceStormtrooper(char **hangar, int x, int y){
 	// usar fuerza con los troopers N, NO, NE
 	if (x-1 >= 0){
 		if (hangar[x-1][y] == 'S'){
 			hangar[x-1][y] = '.';
-			killStormtrooper = true;
 		}
 		
 	}
 	if (x-1 >= 0 && (y-1) >= 0){
 		if (hangar[x-1][y-1] == 'S'){
 			hangar[x-1][y-1] = '.';
-			killStormtrooper = true;
 		}
 	}
 	if (x-1 >= 0 && (y+1) <= M){
 		if (hangar[x-1][y+1] == 'S'){
 			hangar[x-1][y+1] = '.';
-			killStormtrooper = true;
 		}
 	}
 	// usar fuerza con los troopers O, E
 	if (y-1 >= 0){
 		if (hangar[x][y-1] == 'S'){
 			hangar[x][y-1] = '.';
-			killStormtrooper = true;
 		}
 	}
 	
 	if (y+1 < M){
 		if (hangar[x][y+1] == 'S'){
 			hangar[x][y+1] = '.';
-			killStormtrooper = true;
 		}
 	}
 	
@@ -133,19 +237,16 @@ bool ForceStormtrooper(char **hangar, int x, int y){
 	if (x+1 <N){
 		if (hangar[x+1][y] == 'S'){
 			hangar[x+1][y] = '.';
-			killStormtrooper = true;
 		}
 	}
 	if (x+1 < N && (y-1) >= 0){
 		if (hangar[x+1][y-1] == 'S'){
 			hangar[x+1][y-1] = '.';
-			killStormtrooper = true;
 		}
 	}
 	if (x+1 < N && (y+1) <= M){
 		if (hangar[x+1][y+1] == 'S'){
 			hangar[x+1][y+1] = '.';
-			killStormtrooper = true;
 		}
 	}
 }
@@ -159,21 +260,21 @@ void printHangar(char **hangar){
 	}
 }
 void getLuke(char **hangar,int &posX,int &posY){
-	int i,j;
-	for (i=0; i<N; i++){
-		for (j=0; j<M; j++){
-			if(hangar[i][j] == 'L'){
-				posX = i;
-				posY = j;
-				break;
+			int i,j;
+			for (i=0; i<N; i++){
+				for (j=0; j<M; j++){
+					if(hangar[i][j] == 'L'){
+						posX = i;
+						posY = j;
+						break;
+					}
+				}
 			}
 		}
-	}
-}
 bool solucion(char **hangar, int Tiempo){
 	if(Tiempo <= T){
-		for (i=0; i<N; i++){
-			for (j=0; j<M; j++){
+		for (int i=0; i<N; i++){
+			for (int j=0; j<M; j++){
 				if(hangar[i][j] == 'S'){
 					return false;
 				}
@@ -186,7 +287,7 @@ bool solucion(char **hangar, int Tiempo){
 	}
 }
 
-bool moverme(int pos_x, int pos_y, char **marcas, string dir){   
+bool moverme(int pos_x, int pos_y, bool **marcas, string dir){   
      //Norte
      if (dir == "N"){
         if(pos_x-1 >= 0){
@@ -228,82 +329,108 @@ bool moverme(int pos_x, int pos_y, char **marcas, string dir){
      }
 }
 
-void encolarVecinos(estado_actual, cola){
-	if(fuerza en mi estado actual ){
+void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola){
+	if(CanForceStormtrooper(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y ) ){
 		//crear estado
+		State nuevo_estado =  State() ;
 		//aplicar cambios
 		//encolar
+		cola.push(nuevo_estado);
 		
 	}
-	else if(disparar en mi estado actual ){
-		if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N")){
-			//crear estado
+	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N")){
+		//crear estado
+		State nuevo_estado =  State() ;
 		//aplicar cambios
 		//encolar
-		}
-		if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S"){
-			//crear estado
-		//aplicar cambios
-		//encolar
-		}
-		if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E"){
-			//crear estado
-		//aplicar cambios
-		//encolar
-		}
-        if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O"){
-			//crear estado
-		//aplicar cambios
-		//encolar
-		}
-		
+		cola.push(nuevo_estado);
 	}
-	else{
-		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "N")){
-			//crear estado
+	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S")){
+		//crear estado
+		State nuevo_estado =  State() ;
 		//aplicar cambios
 		//encolar
-		}
-		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "S")){
-			//crear estado
+		cola.push(nuevo_estado);
+	}
+	if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E") ){
+		//crear estado
+		State nuevo_estado =  State() ;
 		//aplicar cambios
 		//encolar
-		}
-		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "E")){
-			//crear estado
+		cola.push(nuevo_estado);
+	}
+    if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O") ){
+		//crear estado
+		State nuevo_estado =  State() ;
 		//aplicar cambios
 		//encolar
-		}
-		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "O")){
-			//crear estado
+		cola.push(nuevo_estado);
+	}
+	if( moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "N") ){
+		//crear estado
+		State nuevo_estado =  State() ;
 		//aplicar cambios
 		//encolar
-		}
+		cola.push(nuevo_estado);
+	}
+	if( moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "S") ){
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if( moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "E") ){
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if( moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "O") ){
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		//encolar
+		cola.push(nuevo_estado);
 	}
 	
 }
-void busqueda (cola){
-	state = estado_actual;
-	estado_actual = cola.top();
-	if( solucion(estado_actual.hangarAux,estado_actual.Time_Left) ){
-		return estado_actual.possible_Solution;
+
+
+void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola){
+	if (cola.empty() ){
+		cout<<"no hay solucion";
+		return;
 	}
-	encolarVecinos(estado_actual,cola);
+	State estado_actual =  State() ;
+	estado_actual = cola.top();
+	if( solucion (estado_actual.hangarAux, estado_actual.Time_Left ) ){
+		/*return estado_actual.possible_Solution;*/
+		cout<<"solucion";
+	}
+	encolarVecinos( estado_actual, cola);
 	cola.pop();
 	busqueda(cola);
 }
+
 int main(){
 	//Se leen las dimensiones del hangar y el tiempo
 	cin >> N;
 	cin >> M;
 	cin >> T;
 	
-	//Creamos el hangar
+	//Creamos el hangar y marcador de visitados
 	char **hangar;
+	bool **marcas;
 	//Creamos a flag 
 	bool IKill=false;
 	//Posicion de Luke
 	int posX,posY;
+	
+	//declaramos una cola de prioridad y especificamos el orden del operador >
+	//Se asigna la prioridad de la cola
+	priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola;
 	
 	//Dandole dimensiones al hangar
 	//Array de punteros de char (A las filas solamente)
@@ -312,39 +439,32 @@ int main(){
     for(int x=0; x<N; x++)
         hangar[x] = new char[M]; 
 	
-	//Llenando el hangar
+	marcas = new bool*[N];
+    for(int x=0; x<N; x++){
+    	marcas[x] = new bool[M]; 
+        marcas[x] = false;
+    }
+	//Llenando el hangar y matriz de marcas
 	int i,j;
 	for (i=0; i<N; i++){
 		for (j=0; j<M; j++){
 			cin >> hangar[i][j];
+		/*	if( hangar[i][j] == 'S' || hangar[i][j] == '*' || hangar[i][j] == 'L'){
+				marcas[i][j]=true;
+			}*/
 		}
 	} 
-	
-	//Se le da dimensiones a la matriz auxiliar del struct y se marca como no visitada
-    estado.hangarAux = new bool*[N];
-    
-    for(int x=0; x<N; x++){
-        estado.hangarAux[x] = new bool[M]; 
-        estado.hangarAux[x] = false;
-    }
+	getLuke(hangar,posX,posY);
+	// Encolando el estado inicial
+	cola.push( State(posX , posY , T, hangar, marcas  ) );
 
-	cout << endl;
-	
-	//shootStormtrooper(hangar,1,1);
-	/*
-			3 10 10 
-			SSS......S 
-			SL...S...S 
-			SSS......S
-	 */
-	//IKill = ForceStormtrooper(hangar ,1,1);
-	
-	
-	printHangar(hangar);
-	cout<< endl;
-		
-    /* Crear cola para el BFS
-    list<state> queue;*/
+	    
+	//Display container elements.
+	/*while ( !cola.empty() ) {
+	        cout << cola.top().pos_actual_X << endl;
+	        cola.pop();
+	}
+	cout << endl;*/
 	
 
 	system("pause");
