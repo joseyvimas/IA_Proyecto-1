@@ -5,6 +5,7 @@
 #include <string>
 #include <stdlib.h>
 #include <queue>
+#include <list>
 using namespace std;
 
 int N; //Filas del hangar
@@ -20,6 +21,7 @@ class  State{
 	    char **hangarAux;
 	    bool **marcas;
 	    char *possible_Solution;
+	    list<string> path_Solution;
 	    
 	    State(){
 	    	this->pos_actual_X = 0;
@@ -334,6 +336,11 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		ForceStormtrooper(estado_actual.hangarAux, estado_actual.pos_actual_X,  estado_actual.pos_actual_Y);
+		nuevo_estado.hangarAux = estado_actual.hangarAux;
+		nuevo_estado.marcas = estado_actual.marcas;
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("F")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 		
@@ -342,6 +349,9 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DN")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -349,6 +359,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DS")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -356,6 +368,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DE")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -363,6 +377,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DO")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -370,6 +386,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("N")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -377,6 +395,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("S")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -384,6 +404,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("E")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -391,6 +413,8 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("O")
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
