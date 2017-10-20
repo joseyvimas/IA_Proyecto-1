@@ -13,7 +13,8 @@ struct state {
     int pos_actual_Y;
     int Time_Left;
     char possible_Mov;
-    bool **hangarAux;
+    char **hangarAux;
+    bool **marcas;
     char *possible_Solution;
 } estado;
 
@@ -22,63 +23,59 @@ int M; //Columna del hangar
 int T; //Tiempo en el centro de operaciones explotara
 
 
-//Funcion que verifica si se puede disparar a un Stormtrooper dependiendo las direcciones cardinales, 
-//Si se puede disparar, se elimina el Stormtrooper del hangar
-void canShoot(char **hangar, int x, int y, string Dir){
+//Funcion que verifica si se puede disparar a un Stormtrooper dependiendo las direcciones cardinales
+//recibe el hangar, la posición x,y de Luke, y la direccion
+bool canShoot(char **hangar, int x, int y, string Dir){
 	int i;
-	if (Dir == "N"){
+	if (Dir == "N" && x-1 >= 0){
 		for (i=x-1; i>=0; i--){
 			if (hangar[i][y] == '*'){
-				break;
+				return false;
 			}
 			else if (hangar[i][y] == 'S'){
-				hangar[i][y] = '.';
-				break;
+				return true;
 			}
 		}
-		return;
+		return false;
 	}
-	else if (Dir == "S"){
+	else if (Dir == "S" && x+1 < N){
 		for (i=x+1; i<N; i++){
 			if (hangar[i][y] == '*'){
-				break;
+				return false;
 			}
 			else if (hangar[i][y] == 'S'){
-				hangar[i][y] = '.';
-				break;
+				return true;
 			}
 		}
-		return;
+		return false;
 	}
-	else if (Dir == "E"){
+	else if (Dir == "E" && y+1 < M){
 		for (i=y+1; i<M; i++){
 			if (hangar[x][i] == '*'){
-				break;
+				return false;
 			}
 			else if (hangar[x][i] == 'S'){
-				hangar[x][i] = '.';
-				break;
+				return true;
 			}
 		}
-		return;
+		return false;
 	}
-	else if (Dir == "O"){
+	else if (Dir == "O" && y-1 >= 0){
 		for (i=y-1; i>=0; i--){
 			if (hangar[x][i] == '*'){
-				break;
+				return false;
 			}
 			else if (hangar[x][i] == 'S'){
-				hangar[x][i] = '.';
-				break;
+				return true;
 			}
 		}
-		return;
+		return false;
 	}
+	return false;
 }
 
-
 //Disparar a los Stormtrooper
-void shootStormtrooper(char **hangar, int x, int y){
+/*void shootStormtrooper(char **hangar, int x, int y){
 	if (x-1 >= 0){
 		canShoot(hangar,x,y,"N");
 	}
@@ -91,7 +88,8 @@ void shootStormtrooper(char **hangar, int x, int y){
 	if (y-1 >= 0){
 		canShoot(hangar,x,y,"O");
 	}
-}
+}*/
+
 
 //Usar la fuerza contra los Stormtroopers
 bool ForceStormtrooper(char **hangar, int x, int y){
@@ -172,7 +170,7 @@ void getLuke(char **hangar,int &posX,int &posY){
 		}
 	}
 }
-bool solucion(char **hangarAux, int Tiempo){
+bool solucion(char **hangar, int Tiempo){
 	if(Tiempo <= T){
 		for (i=0; i<N; i++){
 			for (j=0; j<M; j++){
@@ -187,6 +185,49 @@ bool solucion(char **hangarAux, int Tiempo){
 		return false;
 	}
 }
+
+bool moverme(int pos_x, int pos_y, char **marcas, string dir){   
+     //Norte
+     if (dir == "N"){
+        if(pos_x-1 >= 0){
+                   if(marcas[pos_x-1][pos_y] == false){
+                      return true;
+                   }
+                   return false;
+                   
+        }
+     }
+     //Sur
+     else if(dir == "S"){
+        if(pos_x+1 < N){
+                   if(marcas[pos_x+1][pos_y] == false){
+                      return true;
+                   }
+                   return false;
+                   
+        }
+      
+     }
+     //Este
+     else if(dir == "E"){
+        if(pos_y+1 < M){
+                   if(marcas[pos_x][pos_y+1] == false){
+                      return true;
+                   }
+                   return false;
+        }
+     }
+     //Oeste
+     else if(dir == "O"){
+        if(pos_y-1 >= 0){
+                   if(marcas[pos_x][pos_y-1] == false){
+                      return true;
+                   }
+                   return false;
+        }
+     }
+}
+
 void encolarVecinos(estado_actual, cola){
 	if(fuerza en mi estado actual ){
 		//crear estado
@@ -195,21 +236,22 @@ void encolarVecinos(estado_actual, cola){
 		
 	}
 	else if(disparar en mi estado actual ){
-		if(disparar norte){
+		if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N")){
 			//crear estado
 		//aplicar cambios
 		//encolar
 		}
-		if(disparar sur){
+		if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S"){
 			//crear estado
 		//aplicar cambios
 		//encolar
 		}
-		if(disparar este){
+		if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E"){
 			//crear estado
 		//aplicar cambios
 		//encolar
-		}if(disparar oeste){
+		}
+        if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O"){
 			//crear estado
 		//aplicar cambios
 		//encolar
@@ -217,22 +259,22 @@ void encolarVecinos(estado_actual, cola){
 		
 	}
 	else{
-		if(moverme(estado_actual.posicionluke,estado_actual.marcas,Norte)){
+		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "N")){
 			//crear estado
 		//aplicar cambios
 		//encolar
 		}
-		if(moverme(estado_actual.posicionluke,estado_actual.marcas,Sur)){
+		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "S")){
 			//crear estado
 		//aplicar cambios
 		//encolar
 		}
-		if(moverme(estado_actual.posicionluke,estado_actual.marcas,Este)){
+		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "E")){
 			//crear estado
 		//aplicar cambios
 		//encolar
 		}
-		if(moverme(estado_actual.posicionluke,estado_actual.marcas,oeste)){
+		if(moverme(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.marcas, "O")){
 			//crear estado
 		//aplicar cambios
 		//encolar
