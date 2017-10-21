@@ -87,8 +87,8 @@ return structState1.Time_Left < structState2.Time_Left;
 }
 
 //Funcion que verifica si se puede disparar a un Stormtrooper dependiendo las direcciones cardinales
-//recibe el hangar, la posición x,y de Luke, y la direccion
-bool canShoot(char **hangar, int x, int y, string Dir){
+//recibe el hangar, la posición x,y de Luke, la direccion, y 2 variables por refencia que serían la posible ubicación del Stormtrooper (en caso de que se pueda disparar)
+bool canShoot(char **hangar, int x, int y, string Dir, int &stormX,int &stormY){
 	int i;
 	if (Dir == "N" && x-1 >= 0){
 		for (i=x-1; i>=0; i--){
@@ -96,6 +96,8 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 				return false;
 			}
 			else if (hangar[i][y] == 'S'){
+                stormX = i;
+                stormY = y;
 				return true;
 			}
 		}
@@ -107,6 +109,8 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 				return false;
 			}
 			else if (hangar[i][y] == 'S'){
+                stormX = i;
+                stormY = y;
 				return true;
 			}
 		}
@@ -118,6 +122,8 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 				return false;
 			}
 			else if (hangar[x][i] == 'S'){
+                stormX = x;
+                stormY = i;
 				return true;
 			}
 		}
@@ -129,6 +135,8 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 				return false;
 			}
 			else if (hangar[x][i] == 'S'){
+                stormX = x;
+                stormY = i;
 				return true;
 			}
 		}
@@ -137,9 +145,9 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 	return false;
 }
 
-//Disparar a los Stormtrooper
-/*void shootStormtrooper(char **hangar, int x, int y){
-	if (x-1 >= 0){
+//Disparar a un Stormtrooper indicao por la dirección cardinal
+void shootStormtrooper(char **hangar, int x, int y, string dir){
+	if (dir == "N"){
 		canShoot(hangar,x,y,"N");
 	}
 	if (x+1 < N){
@@ -151,7 +159,7 @@ bool canShoot(char **hangar, int x, int y, string Dir){
 	if (y-1 >= 0){
 		canShoot(hangar,x,y,"O");
 	}
-}*/
+}
 
 
 //Usar la fuerza contra los Stormtroopers
@@ -273,6 +281,7 @@ void getLuke(char **hangar,int &posX,int &posY){
 				}
 			}
 		}
+		
 bool solucion(char **hangar, int Tiempo){
 	if(Tiempo <= T){
 		for (int i=0; i<N; i++){
@@ -345,38 +354,56 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		cola.push(nuevo_estado);
 		
 	}
-	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N")){
+	
+	int stormX, stormY; //Posible posición del stormstrooper, a la hora de disparar
+	
+	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N", stormX, stormY)){
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.hangarAux = estado_actual.hangarAux;
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
 		
+		nuevo_estado.marcas = estado_actual.marcas;
 		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DN")
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
-	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S")){
+	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S", stormX, stormY)){
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.hangarAux = estado_actual.hangarAux;
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+		nuevo_estado.marcas = estado_actual.marcas;
 		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DS")
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
-	if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E") ){
+	if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E", stormX, stormY) ){
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.hangarAux = estado_actual.hangarAux;
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+		nuevo_estado.marcas = estado_actual.marcas;
 		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DE")
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
 		cola.push(nuevo_estado);
 	}
-    if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O") ){
+    if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O", stormX, stormY) ){
 		//crear estado
 		State nuevo_estado =  State() ;
 		//aplicar cambios
+		nuevo_estado.hangarAux = estado_actual.hangarAux;
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+		nuevo_estado.marcas = estado_actual.marcas;
 		nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DO")
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
 		//encolar
