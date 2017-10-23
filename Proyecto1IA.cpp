@@ -22,6 +22,7 @@ class  State{
 	    int **marcas;
 	    char *possible_Solution;
 	    list<string> path_Solution;
+	    int cant_Troopers;
 
 	    State(){
 	    	this->pos_actual_X = 0;
@@ -38,24 +39,32 @@ class  State{
 		    }
 		    
 	    	this->possible_Solution = new char[N];
+	    	this->cant_Troopers=0;
 	    }
-	    State( int pos_actual_X, int pos_actual_Y, int Time_Left, char **hangarAux, int **marcas){
+	    State( int pos_actual_X, int pos_actual_Y, int Time_Left, char **hangarAux, int **marcas, int troopers){
 	    	this->pos_actual_X = pos_actual_X;
 	    	this->pos_actual_Y = pos_actual_Y;
 	    	this->Time_Left = Time_Left;
 	    	this->hangarAux = hangarAux;
 	    	this->marcas = marcas;
 	    	this->possible_Solution = new char[N];
+	    	this->cant_Troopers = troopers;
 	    }
 };   
 //sobrecargar el operador <
 bool operator< (const State& structState1, const State &structState2)
 {
+	if( structState1.Time_Left == structState2.Time_Left ){
+		return structState1.cant_Troopers < structState2.cant_Troopers;
+	}
 return structState1.Time_Left > structState2.Time_Left;
 }
 //sobrecargar el operador > 
 bool operator> (const State& structState1, const State &structState2)
 {
+	if( structState1.Time_Left == structState2.Time_Left ){
+		return structState1.cant_Troopers < structState2.cant_Troopers;
+	}
 return structState1.Time_Left < structState2.Time_Left;
 }
 void toList(list<string> &list1, list<string> &list2){
@@ -284,6 +293,17 @@ void printHangar(char **hangar){
 		cout << endl;
 	}
 }
+int cantTrooper(char **hangar){
+	int i,j,contador;
+	for (i=0; i<N; i++){
+		for (j=0; j<M; j++){
+			if(hangar[i][j]== 'S'){
+				contador++;
+			}
+		}
+	}
+	return contador;
+}
 void getLuke(char **hangar,int &posX,int &posY){
 			int i,j;
 			for (i=0; i<N; i++){
@@ -396,6 +416,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("F");*/
 		/*toList( estado_actual.path_Solution.push_back("F")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
 		//encolar
 		cola.push(nuevo_estado);
 		
@@ -421,6 +442,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DN");*/
 	/*	toList(estado_actual.path_Solution.push_back("DN")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -440,6 +462,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DS");*/
 	/*	toList(estado_actual.path_Solution.push_back("DS")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -459,6 +482,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 	/*	nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DE");*/
 	/*toList(estado_actual.path_Solution.push_back("DE")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -478,6 +502,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DO");*/
 	/*	toList(estado_actual.path_Solution.push_back("DO")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -499,6 +524,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("N");*/
 		/*toList(estado_actual.path_Solution.push_back("N")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -528,6 +554,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("S");*/
 		/*toList(estado_actual.path_Solution.push_back("S")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -547,6 +574,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("E");*/
 	/*	toList(estado_actual.path_Solution.push_back("E")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -566,6 +594,7 @@ void encolarVecinos(State estado_actual, priority_queue<State, vector<State>,gre
 		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("O");*/
 	/*	toList(estado_actual.path_Solution.push_back("O")  , nuevo_estado.path_Solution );*/
 		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
 		//encolar
 		cola.push(nuevo_estado);
 	}
@@ -595,6 +624,10 @@ void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_
 	}
 	State estado_actual =  State() ;
 	estado_actual = cola.top();
+	if(estado_actual.Time_Left<0){
+		cola.pop();
+		busqueda(cola, i);
+	}
 	cout<<"Iteracion "<<i <<endl;
 	if( solucion (estado_actual.hangarAux, estado_actual.Time_Left ) ){
 		/*return estado_actual.possible_Solution;*/
@@ -672,8 +705,9 @@ int main(){
 	}  
 	cout<<endl;
 	getLuke(hangar,posX,posY);
+	
 	// Encolando el estado inicial
-	cola.push( State(posX , posY , T, hangar, marcas  ) );
+	cola.push( State(posX , posY , T, hangar, marcas, cantTrooper(hangar)  ) );
 	busqueda(cola,0);
 /*	State S1,S2,S3,S4,S5;
 	S1= State();
