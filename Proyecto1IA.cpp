@@ -39,7 +39,7 @@ class  State{
 		        this->marcas[x] = new int[M]; 
 		    }
 		    
-	    	this->possible_Solution = new char[N];
+	    /*	this->possible_Solution = new char[N];*/
 	    	this->cant_Troopers=0;
 	    	this->pos_estado_anterior_X=0;
 	    	this->pos_estado_anterior_Y=0;
@@ -50,7 +50,7 @@ class  State{
 	    	this->Time_Left = Time_Left;
 	    	this->hangarAux = hangarAux;
 	    	this->marcas = marcas;
-	    	this->possible_Solution = new char[N];
+	    	/*this->possible_Solution = new char[N];*/
 	    	this->cant_Troopers = troopers;
 	    	this->pos_estado_anterior_X=pos_estado_anterior_X;
 	    	this->pos_estado_anterior_Y=pos_estado_anterior_Y;
@@ -66,14 +66,14 @@ return structState1.Time_Left > structState2.Time_Left;
 }*/
 
 //sobrecargar el operador > //operador que estamos usando VERSION TIEMPO + IMPORTANTE
-/*bool operator> (const State& structState1, const State &structState2){
+bool operator> (const State& structState1, const State &structState2){
 	if( structState1.Time_Left == structState2.Time_Left ){
 		return structState1.cant_Troopers > structState2.cant_Troopers;
 	}
 	return structState1.Time_Left < structState2.Time_Left;
-}*/
+}
 //sobrecargar el operador > //operador que estamos usando VERSION CANTIDAD DE TROOPERS + IMPORTANTE
-bool operator> (const State& structState1, const State &structState2){
+/*bool operator> (const State& structState1, const State &structState2){
 	if( structState1.cant_Troopers == structState2.cant_Troopers ){
 		return structState1.Time_Left > structState2.Time_Left;
 	}
@@ -86,7 +86,7 @@ void toList(list<string> &list1, list<string> &list2){
 	        list1.pop_front();
 	}
 
-}
+}*/
 void printMarcas(int**hangar){
 	int i,j;
 	for (i=0; i<N; i++){
@@ -918,7 +918,12 @@ void encolarVecinosV2(State estado_actual, priority_queue<State, vector<State>,g
 	}
 	cout<<"termine de encolar vecinos"<<endl;
 }
-
+void freeMemory(char **hangar, int **marcas){
+	for(int i=0;i<N;i++){
+			delete[] hangar;
+			delete[] marcas;		
+	}
+}
 void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola, int i){
 	
 	/*showQueue(cola);*/
@@ -940,6 +945,10 @@ void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_
 		return;
 	}
 	encolarVecinosV2( estado_actual, cola);
+	freeMemory(estado_actual.hangarAux,estado_actual.marcas);
+	delete estado_actual.hangarAux;
+	delete estado_actual.marcas;
+	delete &estado_actual;
 	cola.pop();
 	i++;
 	busqueda(cola, i);
