@@ -23,7 +23,8 @@ class  State{
 	    char *possible_Solution;
 	    list<string> path_Solution;
 	    int cant_Troopers;
-
+		int pos_estado_anterior_X;
+	    int pos_estado_anterior_Y;
 	    State(){
 	    	this->pos_actual_X = 0;
 	    	this->pos_actual_Y = 0;
@@ -40,8 +41,10 @@ class  State{
 		    
 	    	this->possible_Solution = new char[N];
 	    	this->cant_Troopers=0;
+	    	this->pos_estado_anterior_X=0;
+	    	this->pos_estado_anterior_Y=0;
 	    }
-	    State( int pos_actual_X, int pos_actual_Y, int Time_Left, char **hangarAux, int **marcas, int troopers){
+	    State( int pos_actual_X, int pos_actual_Y, int Time_Left, char **hangarAux, int **marcas, int troopers, int pos_estado_anterior_X, int pos_estado_anterior_Y){
 	    	this->pos_actual_X = pos_actual_X;
 	    	this->pos_actual_Y = pos_actual_Y;
 	    	this->Time_Left = Time_Left;
@@ -49,24 +52,34 @@ class  State{
 	    	this->marcas = marcas;
 	    	this->possible_Solution = new char[N];
 	    	this->cant_Troopers = troopers;
+	    	this->pos_estado_anterior_X=pos_estado_anterior_X;
+	    	this->pos_estado_anterior_Y=pos_estado_anterior_Y;
 	    }
 };   
 //sobrecargar el operador <
-bool operator< (const State& structState1, const State &structState2)
+/*bool operator< (const State& structState1, const State &structState2)
 {
 	if( structState1.Time_Left == structState2.Time_Left ){
 		return structState1.cant_Troopers < structState2.cant_Troopers;
 	}
 return structState1.Time_Left > structState2.Time_Left;
-}
-//sobrecargar el operador > 
-bool operator> (const State& structState1, const State &structState2)
-{
+}*/
+
+//sobrecargar el operador > //operador que estamos usando VERSION TIEMPO + IMPORTANTE
+/*bool operator> (const State& structState1, const State &structState2){
 	if( structState1.Time_Left == structState2.Time_Left ){
-		return structState1.cant_Troopers < structState2.cant_Troopers;
+		return structState1.cant_Troopers > structState2.cant_Troopers;
 	}
-return structState1.Time_Left < structState2.Time_Left;
+	return structState1.Time_Left < structState2.Time_Left;
+}*/
+//sobrecargar el operador > //operador que estamos usando VERSION CANTIDAD DE TROOPERS + IMPORTANTE
+bool operator> (const State& structState1, const State &structState2){
+	if( structState1.cant_Troopers == structState2.cant_Troopers ){
+		return structState1.Time_Left > structState2.Time_Left;
+	}
+	return structState1.cant_Troopers > structState2.cant_Troopers;
 }
+
 void toList(list<string> &list1, list<string> &list2){
 	while ( !list1.empty() ) {
 	        list2.push_back(list1.front());
@@ -614,6 +627,298 @@ void showQueue(priority_queue<State, vector<State>,greater<vector<State>::value_
 	cout<<endl;
 	
 }
+bool puedo_visitar2(int pos_x, int pos_y, char **hangar, string dir, int &LukeX , int &LukeY, int pos_estado_anterior_X, int pos_estado_anterior_Y){   
+/*	cout<< "x: "<< pos_x<<" Y: "<<pos_y<<" direccion: "<<dir<<endl;*/
+	
+     //Norte
+     if (dir == "N"){
+        if(pos_x-1 >= 0){
+                   if( (pos_x-1 == pos_estado_anterior_X && pos_y == pos_estado_anterior_Y) || (hangar[pos_x-1][pos_y] !='.') ){
+                   	return false;
+                   }      
+                   LukeX = pos_x-1;
+                   LukeY = pos_y;
+                return true;
+                   
+        }
+        return false;
+     }
+     //Sur
+     else if(dir == "S"){
+        if(pos_x+1 < N){
+                   if( (pos_x+1 == pos_estado_anterior_X && pos_y == pos_estado_anterior_Y) || (hangar[pos_x+1][pos_y] !='.') ){
+                   	 return false;
+                   }
+                   LukeX = pos_x+1;
+                   	 LukeY = pos_y;
+     
+                      return true;
+                   
+                   
+        }
+        return false;
+     }
+     //Este
+     else if(dir == "E"){
+        if(pos_y+1 < M){
+                   if( (pos_estado_anterior_X && pos_y+1 == pos_estado_anterior_Y) || (hangar[pos_x][pos_y+1] !='.') ){
+                   	return false;
+                   }
+                   LukeX = pos_x;
+                   	LukeY = pos_y+1;
+     
+                      return true;
+                   
+        }
+        return false;
+     }
+     //Oeste
+     else if(dir == "O"){
+        if(pos_y-1 >= 0){
+                   if( (pos_x == pos_estado_anterior_X && pos_y-1 == pos_estado_anterior_Y) || (hangar[pos_x][pos_y-1] !='.') ){
+                   	return false;
+                   }
+                   LukeX = pos_x;
+                   	LukeY = pos_y-1;
+  
+                      return true;
+                   
+        }
+        return false;
+     }
+}
+void encolarVecinosV2(State estado_actual, priority_queue<State, vector<State>,greater<vector<State>::value_type> > &cola){
+	cout<<"encolando vecinos"<<endl;	
+	printHangar(estado_actual.hangarAux);
+	cout<<endl;
+	if(CanForceStormtrooper(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y ) ){
+		cout<<"fuerza "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		/*nuevo_estado.hangarAux = estado_actual.hangarAux;*/
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		/*nuevo_estado.marcas = estado_actual.marcas;*/
+	/*	copyMarcas( estado_actual.marcas, nuevo_estado.marcas);*/
+		ForceStormtrooper(nuevo_estado.hangarAux, estado_actual.pos_actual_X,  estado_actual.pos_actual_Y , nuevo_estado.marcas);
+		
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("F");*/
+		/*toList( estado_actual.path_Solution.push_back("F")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		 
+		//encolar
+		cola.push(nuevo_estado);
+		
+	}
+	
+	int stormX, stormY, Luke_nuevo_X , Luke_nuevo_Y; //Posible posición del stormstrooper, a la hora de disparar
+	/*cout<<"verificando disparos "<<endl;*/
+	/*printHangar(estado_actual.hangarAux);*/
+/*	cout<<endl;*/
+	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N", stormX, stormY)){
+		cout<<"dispara N "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+		/*copyMarcas( estado_actual.marcas, nuevo_estado.marcas);*/
+		nuevo_estado.marcas[stormX][stormY] = 0; //marcamos como no visitada donde estaba el trooper 
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DN");*/
+	/*	toList(estado_actual.path_Solution.push_back("DN")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
+		
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if(canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S", stormX, stormY)){
+		cout<<"dispara S "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+		/*copyMarcas( estado_actual.marcas, nuevo_estado.marcas);*/
+		nuevo_estado.marcas[stormX][stormY] = 0; //marcamos como no visitada donde estaba el trooper 
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DS");*/
+	/*	toList(estado_actual.path_Solution.push_back("DS")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
+		
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E", stormX, stormY) ){
+		cout<<"dispara E "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+	    copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+	/*	copyMarcas( estado_actual.marcas, nuevo_estado.marcas);*/
+		nuevo_estado.marcas[stormX][stormY] = 0; //marcamos como no visitada donde estaba el trooper 
+	/*	nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DE");*/
+	/*toList(estado_actual.path_Solution.push_back("DE")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
+		
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+    if( canShoot(estado_actual.hangarAux, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O", stormX, stormY) ){
+    	cout<<"dispara O "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		nuevo_estado.hangarAux[stormX][stormY] = '.'; //Eliminamos el stormstrooper del estado actual
+		
+		/*copyMarcas( estado_actual.marcas, nuevo_estado.marcas);*/
+		nuevo_estado.marcas[stormX][stormY] = 0; //marcamos como no visitada donde estaba el trooper 
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("DO");*/
+	/*	toList(estado_actual.path_Solution.push_back("DO")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = cantTrooper(nuevo_estado.hangarAux);
+		
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	/*cout<<"verificando movimientos"<<endl;*/
+/*	printHangar(estado_actual.hangarAux);*/
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.hangarAux, "N", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) ){
+		cout<<"moverme N "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		copyMarcas( estado_actual.marcas, nuevo_estado.marcas);
+		nuevo_estado.hangarAux[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = '.'; //quitamos la vieja posicion de Luke 
+		nuevo_estado.marcas[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = 1; //Marcamos como visitada la posicion anterior 
+		nuevo_estado.hangarAux[Luke_nuevo_X][Luke_nuevo_Y] = 'L'; //movemos a Luke a su nueva posicion 
+		
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("N");*/
+		/*toList(estado_actual.path_Solution.push_back("N")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
+		
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.hangarAux, "S", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) ){
+		cout<<"moverme S "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		copyMarcas( estado_actual.marcas, nuevo_estado.marcas);
+	/*	cout<<"copie el hangar y las marcas "<<endl;
+		cout<<estado_actual.pos_actual_X <<" "<<estado_actual.pos_actual_Y<<endl;
+		cout<<"valores nuevos_ "<<Luke_nuevo_X <<" "<<Luke_nuevo_Y<<endl;*/
+		nuevo_estado.hangarAux[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = '.'; //quitamos la vieja posicion de Luke 
+		nuevo_estado.hangarAux[Luke_nuevo_X][Luke_nuevo_Y] = 'L'; //movemos a Luke a su nueva posicion 
+		
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		/*cout<<"modifique el hangars "<<endl;*/
+		
+		nuevo_estado.marcas[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = 1; //Marcamos como visitada la posicion anterior 
+		nuevo_estado.marcas[Luke_nuevo_X][Luke_nuevo_Y] = 1; //Marcamos como visitada la posicion anterior 
+		
+		
+	/*	printHangar(nuevo_estado.hangarAux);
+		printMarcas(nuevo_estado.marcas);*/
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("S");*/
+		/*toList(estado_actual.path_Solution.push_back("S")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
+		
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.hangarAux, "E", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) ){
+		cout<<"moverme E "<<endl;
+		//crear estado
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		copyMarcas( estado_actual.marcas, nuevo_estado.marcas);
+		nuevo_estado.hangarAux[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = '.'; //quitamos la vieja posicion de Luke 
+		nuevo_estado.marcas[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = 1; //Marcamos como visitada la posicion anterior 
+		nuevo_estado.hangarAux[Luke_nuevo_X][Luke_nuevo_Y] = 'L'; //movemos a Luke a su nueva posicion 
+		
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("E");*/
+	/*	toList(estado_actual.path_Solution.push_back("E")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
+		
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.hangarAux, "O", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) ){
+		cout<<"moverme O "<<endl;
+		//crear estadopos_estado_anterior_X
+		State nuevo_estado =  State() ;
+		//aplicar cambios
+		copyHangar( estado_actual.hangarAux, nuevo_estado.hangarAux );
+		copyMarcas( estado_actual.marcas, nuevo_estado.marcas);
+		nuevo_estado.hangarAux[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = '.'; //quitamos la vieja posicion de Luke 
+		nuevo_estado.marcas[estado_actual.pos_actual_X][estado_actual.pos_actual_Y] = 1; //Marcamos como visitada la posicion anterior 
+		nuevo_estado.hangarAux[Luke_nuevo_X][Luke_nuevo_Y] = 'L'; //movemos a Luke a su nueva posicion 
+		
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		/*nuevo_estado.path_Solution = estado_actual.path_Solution.push_back("O");*/
+	/*	toList(estado_actual.path_Solution.push_back("O")  , nuevo_estado.path_Solution );*/
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;
+		
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	cout<<"termine de encolar vecinos"<<endl;
+}
+
 void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola, int i){
 	
 	/*showQueue(cola);*/
@@ -634,7 +939,7 @@ void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_
 		cout<<"SI HAY solucion"<<endl;
 		return;
 	}
-	encolarVecinos( estado_actual, cola);
+	encolarVecinosV2( estado_actual, cola);
 	cola.pop();
 	i++;
 	busqueda(cola, i);
@@ -707,29 +1012,34 @@ int main(){
 	getLuke(hangar,posX,posY);
 	
 	// Encolando el estado inicial
-	cola.push( State(posX , posY , T, hangar, marcas, cantTrooper(hangar)  ) );
+	cola.push( State(posX , posY , T, hangar, marcas, cantTrooper(hangar),posX,posY  ) );
 	busqueda(cola,0);
-/*	State S1,S2,S3,S4,S5;
+/*	State S1,S2,S3,S4;
 	S1= State();
 	S2= State();
 	S3= State();
 	S4= State();
-	S1.Time_Left = 1;
-	S2.Time_Left = 25;
-	S3.Time_Left = 3;
-	S4.Time_Left = 4;
-	S5.Time_Left = 25;
+	S1.Time_Left = 2;
+	S1.cant_Troopers= 2;
+	S2.Time_Left = 1;
+	S2.cant_Troopers= 3;
+	S3.Time_Left = 2;
+	S3.cant_Troopers= 3;
+	S4.Time_Left = 2;
+	S4.cant_Troopers= 4;
+	
+	
 	S1.pos_actual_X = 1;
 	S2.pos_actual_X = 2;
 	S3.pos_actual_X = 3;
 	S4.pos_actual_X = 4;
-	S5.pos_actual_X = 5;
+	
 	cola.push(S1);
 	cola.push(S2);
 	cola.push(S3);
-	cola.push(S4);
-	cola.push(S5);
-	showTimeQueue(cola);*/
+	cola.push(S4);*/
+
+	showTimeQueue(cola);
 	system("pause");
 	return 0;
 }
