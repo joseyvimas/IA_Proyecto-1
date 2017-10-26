@@ -21,6 +21,8 @@ char **hangarCopia;
 int pos_inicial_X;  
 int pos_inicial_Y; 
 
+
+
 class  State{
 	public:
 		int pos_actual_X;
@@ -31,6 +33,11 @@ class  State{
 		int cant_Troopers;
 		int pos_estado_anterior_X;
 		int pos_estado_anterior_Y;
+		bool NoDN;
+		bool NoDS;
+		bool NoDE;
+		bool NoDO;
+		
 	State(){
 		this->pos_actual_X = 0;
 		this->pos_actual_Y = 0;
@@ -39,6 +46,10 @@ class  State{
 		this->cant_Troopers=0;
 		this->pos_estado_anterior_X=0;
 		this->pos_estado_anterior_Y=0;
+		this->NoDN =false;
+		this->NoDS =false;
+		this->NoDE =false;
+		this->NoDO =false;
 	}
 	State( int pos_actual_X, int pos_actual_Y, int Time_Left, int troopers, int pos_estado_anterior_X, int pos_estado_anterior_Y){
 		this->pos_actual_X = pos_actual_X;
@@ -48,6 +59,10 @@ class  State{
 		this->cant_Troopers = troopers;
 		this->pos_estado_anterior_X=pos_estado_anterior_X;
 		this->pos_estado_anterior_Y=pos_estado_anterior_Y;
+		this->NoDN =false;
+		this->NoDS =false;
+		this->NoDE =false;
+		this->NoDO =false;
 	}
 };  
 
@@ -61,20 +76,20 @@ return structState1.Time_Left > structState2.Time_Left;
 }*/
 
 //sobrecargar el operador > //operador que estamos usando VERSION TIEMPO + IMPORTANTE
-/*bool operator> (const State& structState1, const State &structState2){
+bool operator> (const State& structState1, const State &structState2){
 	if( structState1.Time_Left == structState2.Time_Left ){
 		return structState1.cant_Troopers > structState2.cant_Troopers;
 	}
 	return structState1.Time_Left < structState2.Time_Left;
-}*/
+}
 
 //sobrecargar el operador > //operador que estamos usando VERSION CANTIDAD DE TROOPERS + IMPORTANTE
-bool operator> (const State& structState1, const State &structState2){
+/*bool operator> (const State& structState1, const State &structState2){
 	if( structState1.cant_Troopers == structState2.cant_Troopers ){
 		return structState1.Time_Left < structState2.Time_Left;
 	}
 	return structState1.cant_Troopers > structState2.cant_Troopers;
-}
+}*/
 
 
 void copyHangar( char** hangar1, char** &hangar2 ){
@@ -231,6 +246,58 @@ void ForceStormtrooper(char **hangar, int x, int y){
 	if (x+1 <N){
 		if (hangar[x+1][y] == 'S'){
 			hangar[x+1][y] = '.';
+		}
+	}
+	if (x+1 < N && (y-1) >= 0){
+		if (hangar[x+1][y-1] == 'S'){
+			hangar[x+1][y-1] = '.';
+		}
+	}
+	if (x+1 < N && (y+1) <= M){
+		if (hangar[x+1][y+1] == 'S'){
+			hangar[x+1][y+1] = '.';
+		}
+	}
+}
+void ForceStormtrooper3(char **hangar, int x, int y, bool & NoDN, bool & NoDS, bool & NoDE, bool & NoDO){
+	// usar fuerza con los troopers N, NO, NE
+	if (x-1 >= 0){
+		if (hangar[x-1][y] == 'S'){
+			hangar[x-1][y] = '.';
+			NoDO=false;
+		}
+		
+	}
+	if (x-1 >= 0 && (y-1) >= 0){
+		if (hangar[x-1][y-1] == 'S'){
+			hangar[x-1][y-1] = '.';
+		}
+	}
+	if (x-1 >= 0 && (y+1) <= M){
+		if (hangar[x-1][y+1] == 'S'){
+			hangar[x-1][y+1] = '.';
+		}
+	}
+	// usar fuerza con los troopers O, E
+	if (y-1 >= 0){
+		if (hangar[x][y-1] == 'S'){
+			hangar[x][y-1] = '.';
+			NoDS=false;
+		}
+	}
+	
+	if (y+1 < M){
+		if (hangar[x][y+1] == 'S'){
+			hangar[x][y+1] = '.';
+			NoDN=false;
+		}
+	}
+	
+	// usar fuerza con los troopers S, SO, SE
+	if (x+1 <N){
+		if (hangar[x+1][y] == 'S'){
+			hangar[x+1][y] = '.';
+			NoDE=false;
 		}
 	}
 	if (x+1 < N && (y-1) >= 0){
@@ -427,7 +494,7 @@ void aplicarPasos (char **hangar, vector<string> pasos){
 
 void encolarVecinosV2(State estado_actual, priority_queue<State, vector<State>,greater<vector<State>::value_type> > &cola){
 	int stormX, stormY, Luke_nuevo_X , Luke_nuevo_Y; //Posible posición del stormstrooper y Luke, a la hora de disparar
-	cout<<"encolando vecinos"<<endl;	
+	cout<<"encolando vecinos V2"<<endl;	
 	printHangar(hangarActual);
 	cout<<endl;
 	
@@ -572,7 +639,7 @@ void encolarVecinosV2(State estado_actual, priority_queue<State, vector<State>,g
 		cola.push(nuevo_estado);
 	}
 	
-	//MOVERME ESTE
+	//MOVERME NORTE
 	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, hangarActual, "N", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) ){
 		//crear estado
 		State nuevo_estado =  State();
@@ -632,6 +699,8 @@ void encolarVecinosV2(State estado_actual, priority_queue<State, vector<State>,g
 	
 	//MOVERME ESTE
 	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, hangarActual, "E", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) ){
+		
+		
 		//crear estado
 		State nuevo_estado =  State();
 		
@@ -690,6 +759,342 @@ void encolarVecinosV2(State estado_actual, priority_queue<State, vector<State>,g
 
 }
 
+
+
+/////////////////////////////
+
+void encolarVecinosV3(State estado_actual, priority_queue<State, vector<State>,greater<vector<State>::value_type> > &cola){
+	int stormX, stormY, Luke_nuevo_X , Luke_nuevo_Y; //Posible posición del stormstrooper y Luke, a la hora de disparar
+	cout<<"encolando vecinos V3"<<endl;	
+	printHangar(hangarActual);
+	cout<<endl;
+	
+	
+	//FUERZA
+	if(CanForceStormtrooper(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y)){
+		
+		copyHangar(hangarActual, hangarCopia);  //Copiamos el hangar actual
+		
+		//crear estado
+		State nuevo_estado =  State() ;
+		
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		ForceStormtrooper3(hangarCopia, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, estado_actual.NoDN,estado_actual.NoDS,estado_actual.NoDE,estado_actual.NoDO);   //Aplicamos fuerza
+
+		nuevo_estado.solucion = estado_actual.solucion + ",F";  //Copiamos F en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("F");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1;  //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = cantTrooper(hangarCopia);  //Contamos la cantidad de troopers que quedan en el hangar
+		
+		//Asignamos nuestra posicion actual como posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		 
+		 
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDN = estado_actual.NoDN;
+		nuevo_estado.NoDS = estado_actual.NoDS;
+		nuevo_estado.NoDE = estado_actual.NoDE;
+		nuevo_estado.NoDO = estado_actual.NoDO;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	
+	//DISPARAR NORTE
+	if(canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N", stormX, stormY)){
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",DN";  //Copiamos DN en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("DN");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers-1;  //Contamos la cantidad de troopers que quedan en el hangar
+		
+		//Asignamos nuestra posicion actual como posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDN = estado_actual.NoDN;
+		nuevo_estado.NoDS = estado_actual.NoDS;
+		nuevo_estado.NoDE = estado_actual.NoDE;
+		nuevo_estado.NoDO = estado_actual.NoDO;
+		
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//DISPARAR SUR
+	if(canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S", stormX, stormY)){
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+
+		nuevo_estado.solucion = estado_actual.solucion + ",DS";  //Copiamos DS en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("DS");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers-1;  //Contamos la cantidad de troopers que quedan en el hangar
+		
+		//Asignamos nuestra posicion actual como posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDN = estado_actual.NoDN;
+		nuevo_estado.NoDS = estado_actual.NoDS;
+		nuevo_estado.NoDE = estado_actual.NoDE;
+		nuevo_estado.NoDO = estado_actual.NoDO;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//DISPARAR ESTE
+	if(canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E", stormX, stormY)){
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",DE";  //Copiamos DE en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("DE");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers-1;  //Contamos la cantidad de troopers que quedan en el hangar
+		
+		//Asignamos nuestra posicion actual como posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		
+		
+		//mantener reglas disparos de otros estados
+		nuevo_estado.NoDN = estado_actual.NoDN;
+		nuevo_estado.NoDS = estado_actual.NoDS;
+		nuevo_estado.NoDE = estado_actual.NoDE;
+		nuevo_estado.NoDO = estado_actual.NoDO;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//DISPARAR OESTE
+	if(canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O", stormX, stormY)){
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		nuevo_estado.pos_actual_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_actual_Y = estado_actual.pos_actual_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",DO";  //Copiamos DO en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("DO");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers-1;  //Contamos la cantidad de troopers que quedan en el hangar
+		
+		//Asignamos nuestra posicion actual como posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = nuevo_estado.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = nuevo_estado.pos_actual_Y;
+		
+		//mantener reglas disparos de otros estados
+		nuevo_estado.NoDN = estado_actual.NoDN;
+		nuevo_estado.NoDS = estado_actual.NoDS;
+		nuevo_estado.NoDE = estado_actual.NoDE;
+		nuevo_estado.NoDO = estado_actual.NoDO;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//MOVERME NORTE
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, hangarActual, "N", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) && !estado_actual.NoDN ){
+
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		
+		//bloquear disparar en proximos estados semejantes
+		if( canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "N", stormX, stormY) ){
+			nuevo_estado.NoDN = true;
+		}
+		//Actualizamos la posicion actual de Luke
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",N";  //Copiamos N en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("N");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;  //Asignamos la misma cantidad de troopers
+		
+		//Actualizamos la posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDS = false;
+		nuevo_estado.NoDE = false;
+		nuevo_estado.NoDO = false;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//MOVERME SUR
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, hangarActual, "S", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) && !estado_actual.NoDS ){
+		
+		
+		
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		
+		//bloquear disparar en proximos estados semejantes
+		if( canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "S", stormX, stormY) ){
+			nuevo_estado.NoDS = true;
+		}
+		//Actualizamos la posicion actual de Luke
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",S";  //Copiamos S en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("S");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;  //Asignamos la misma cantidad de troopers
+		
+		//Actualizamos la posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDN = false;
+		nuevo_estado.NoDE = false;
+		nuevo_estado.NoDO = false;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//MOVERME ESTE
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, hangarActual, "E", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) && !estado_actual.NoDE ){
+
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		
+		//bloquear disparar en proximos estados semejantes
+		if( canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "E", stormX, stormY) ){
+			nuevo_estado.NoDE = true;
+		}
+		//Actualizamos la posicion actual de Luke
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",E";  //Copiamos E en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("E");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;  //Asignamos la misma cantidad de troopers
+		
+		//Actualizamos la posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDN = false;
+		nuevo_estado.NoDS = false;
+		nuevo_estado.NoDO = false;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+	
+	//MOVERME OESTE
+	if( puedo_visitar2(estado_actual.pos_actual_X, estado_actual.pos_actual_Y, hangarActual, "O", Luke_nuevo_X, Luke_nuevo_Y, estado_actual.pos_estado_anterior_X, estado_actual.pos_estado_anterior_Y) && !estado_actual.NoDO){
+			
+		//crear estado
+		State nuevo_estado =  State();
+		
+		//aplicar cambios
+		//bloquear disparar en proximos estados semejantes
+		if( canShoot(hangarActual, estado_actual.pos_actual_X, estado_actual.pos_actual_Y, "O", stormX, stormY) ){
+			nuevo_estado.NoDO = true;
+		}
+		
+		//Actualizamos la posicion actual de Luke
+		nuevo_estado.pos_actual_X = Luke_nuevo_X;
+		nuevo_estado.pos_actual_Y = Luke_nuevo_Y;
+		
+		nuevo_estado.solucion = estado_actual.solucion + ",O";  //Copiamos O en la posible solucion
+		
+		//Almacenamos el movimiento que se realizo
+		nuevo_estado.pasos = estado_actual.pasos;   
+		nuevo_estado.pasos.push_back("O");
+		
+		nuevo_estado.Time_Left = estado_actual.Time_Left-1; //Disminuimos el tiempo
+		
+		nuevo_estado.cant_Troopers = estado_actual.cant_Troopers;  //Asignamos la misma cantidad de troopers
+		
+		//Actualizamos la posicion de estado anterior
+		nuevo_estado.pos_estado_anterior_X = estado_actual.pos_actual_X;
+		nuevo_estado.pos_estado_anterior_Y = estado_actual.pos_actual_Y;
+		
+		//desbloquear disparos de otros estados
+		nuevo_estado.NoDN = false;
+		nuevo_estado.NoDS = false;
+		nuevo_estado.NoDE = false;
+		//encolar
+		cola.push(nuevo_estado);
+	}
+
+}
+
 void showTimeQueue(priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola){
 	State tope;
 	int i=0;
@@ -735,6 +1140,69 @@ void busqueda (priority_queue<State, vector<State>,greater<vector<State>::value_
 	busqueda(cola, i);
 }
 
+void busqueda_por_Tiempo (priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola, int i){
+	if ( cola.empty() ){
+		cout<< "A great loss for the rebels" << endl;
+		return;	
+	}
+	if ( solucion_Existe ){
+			cout << "The Force is Strong in Luke!" << endl;
+			for (int x=1; (unsigned)x<Path_solucion.length(); x++){
+				cout << Path_solucion[x];
+			}
+			return;
+	}
+	
+	State estado_actual =  State() ;
+	estado_actual = cola.top();
+	cola.pop();
+	if( estado_actual.Time_Left<0 ){
+		cout<<"mi tiempo se agoto :("<<endl;
+		busqueda_por_Tiempo(cola, i);
+		return;
+	}
+	
+	//Copiamos el hangar original a un hangar auxiliar
+	copyHangar(hangarOriginal, hangarActual);
+	aplicarPasos(hangarActual, estado_actual.pasos);
+
+	solucion(hangarActual, estado_actual.Time_Left, estado_actual.solucion);
+	encolarVecinosV3( estado_actual, cola);
+	i++;
+	busqueda_por_Tiempo(cola, i);
+}
+
+void busqueda_Troopers_Optimizada (priority_queue<State, vector<State>,greater<vector<State>::value_type> > cola, int i){
+	if ( cola.empty() ){
+		if ( solucion_Existe ){
+			cout << "The Force is Strong in Luke!" << endl;
+			for (int x=1; (unsigned)x<Path_solucion.length(); x++){
+				cout << Path_solucion[x];
+			}
+		}
+		else{
+			cout<< "A great loss for the rebels" << endl;
+		}	
+		return;
+	}
+	
+	State estado_actual =  State() ;
+	estado_actual = cola.top();
+	cola.pop();
+	if( estado_actual.Time_Left<0 || ( solucion_Existe && estado_actual.Time_Left<= Tiempo_solucion ) ){
+		busqueda_Troopers_Optimizada(cola, i);
+		return;
+	}
+	
+	//Copiamos el hangar original a un hangar auxiliar
+	copyHangar(hangarOriginal, hangarActual);
+	aplicarPasos(hangarActual, estado_actual.pasos);
+
+	solucion(hangarActual, estado_actual.Time_Left, estado_actual.solucion);
+	encolarVecinosV3( estado_actual, cola);
+	i++;
+	busqueda_Troopers_Optimizada(cola, i);
+}
 int main(){
 	//Se leen las dimensiones del hangar y el tiempo
 	cin >> N;
@@ -780,7 +1248,9 @@ int main(){
 	
 	// Encolando el estado inicial
 	cola.push(State(pos_inicial_X, pos_inicial_Y, T, cantTrooper(hangarOriginal),pos_inicial_X,pos_inicial_Y));
-	busqueda(cola,0);
+	//busqueda(cola,0);
+	busqueda_por_Tiempo(cola,0);
+/*	busqueda_Troopers_Optimizada(cola,0);*/
 	/*State S1,S2,S3,S4,S5;
 	S1= State();
 	S2= State();
